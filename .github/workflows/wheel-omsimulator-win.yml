@@ -77,7 +77,8 @@ jobs:
           CIBW_REPAIR_WHEEL_COMMAND: >
             python -m delvewheel repair -w {dest_dir} {wheel}
         run: |
-          python -m cibuildwheel "%PKGDIR%" --output-dir wheelhouse
+          echo "PKGDIR=$env:PKGDIR"
+          python -m cibuildwheel "$env:PKGDIR" --output-dir wheelhouse
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
