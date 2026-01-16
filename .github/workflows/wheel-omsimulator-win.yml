@@ -35,11 +35,11 @@ jobs:
           tar -xf $tgz.FullName -C sdist
 
           $pkg = Get-ChildItem -Path sdist -Recurse -Directory |
-            Where-Object {
-              Test-Path (Join-Path $_.FullName "pyproject.toml") -or
-              Test-Path (Join-Path $_.FullName "setup.py") -or
-              Test-Path (Join-Path $_.FullName "setup.cfg")
-            } | Select-Object -First 1
+          Where-Object {
+          (Test-Path (Join-Path $_.FullName "pyproject.toml")) -or
+          (Test-Path (Join-Path $_.FullName "setup.py")) -or
+          (Test-Path (Join-Path $_.FullName "setup.cfg"))
+          } | Select-Object -First 1
 
           if (-not $pkg) {
             Write-Error "Could not locate package root (no pyproject.toml/setup.py/setup.cfg) under sdist/"
