@@ -73,7 +73,7 @@ jobs:
         env:
           CIBW_BUILD: "cp314-win_amd64"
           CIBW_SKIP: "cp314t-*"
-          CIBW_ENVIRONMENT: "PATH=$PATH;C:\\Program Files\\OpenModelica*\\bin"
+          CIBW_ENVIRONMENT: "PATH=C:\\Program Files\\OpenModelica1.25.5-64bit\\bin;%PATH%"
           CIBW_REPAIR_WHEEL_COMMAND: >
             python -m delvewheel repair -w {dest_dir} {wheel}
         run: |
