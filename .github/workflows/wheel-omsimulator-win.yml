@@ -34,20 +34,23 @@ jobs:
           $tgz = Get-ChildItem -Path sdist -Filter "omsimulator-3.0.0.post116.tar.gz" | Select-Object -First 1
           tar -xf $tgz.FullName -C sdist
 
-          $pkg = Get-ChildItem -Path sdist -Recurse -Directory |
-          Where-Object {
-          (Test-Path (Join-Path $_.FullName "pyproject.toml")) -or
-          (Test-Path (Join-Path $_.FullName "setup.py")) -or
-          (Test-Path (Join-Path $_.FullName "setup.cfg"))
-          } | Select-Object -First 1
+          # cerca solo entro pochi livelli (evita prendere roba tipo Cython)
+          $candidates = Get-ChildItem -Path sdist -Directory -Recurse -Depth 3
+
+          $pkg = $candidates | Where-Object { Test-Path (Join-Path $_.FullName "pyproject.toml") } | Select-Object -First 1
+          if (-not $pkg) { $pkg = $candidates | Where-Object { Test-Path (Join-Path $_.FullName "setup.py") } | Select-Object -First 1 }
+          if (-not $pkg) { $pkg = $candidates | Where-Object { Test-Path (Join-Path $_.FullName "setup.cfg") } | Select-Object -First 1 }
 
           if (-not $pkg) {
-            Write-Error "Could not locate package root (no pyproject.toml/setup.py/setup.cfg) under sdist/"
+            Write-Host "Top-level dirs under sdist:"
+            Get-ChildItem -Path sdist -Directory | ForEach-Object { Write-Host " - $($_.FullName)" }
+            Write-Error "Could not locate package root (no pyproject.toml/setup.py/setup.cfg) within depth 3 under sdist/"
             exit 1
           }
 
           echo "PKGDIR=$($pkg.FullName)" >> $env:GITHUB_ENV
           Write-Host "PKGDIR=$($pkg.FullName)"
+
 
       - name: Build wheel (cp314 win_amd64 only)
         env:
