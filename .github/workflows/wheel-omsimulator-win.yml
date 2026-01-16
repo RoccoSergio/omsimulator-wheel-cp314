@@ -35,7 +35,9 @@ jobs:
           tar -xf $tgz.FullName -C sdist
 
           # cerca solo entro pochi livelli (evita prendere roba tipo Cython)
-          $candidates = Get-ChildItem -Path sdist -Directory -Recurse -Depth 3
+          $candidates = Get-ChildItem -Path sdist -Directory -Recurse | Where-Object {
+            ($_.FullName -split '\\').Count -le ((Resolve-Path sdist).Path -split '\\').Count + 3
+          }
 
           $pkg = $candidates | Where-Object { Test-Path (Join-Path $_.FullName "pyproject.toml") } | Select-Object -First 1
           if (-not $pkg) { $pkg = $candidates | Where-Object { Test-Path (Join-Path $_.FullName "setup.py") } | Select-Object -First 1 }
@@ -51,12 +53,27 @@ jobs:
           echo "PKGDIR=$($pkg.FullName)" >> $env:GITHUB_ENV
           Write-Host "PKGDIR=$($pkg.FullName)"
 
+      - name: Show PKGDIR listing
+        shell: pwsh
+        run: |
+          Write-Host "PKGDIR=$env:PKGDIR"
+          Get-ChildItem -Force $env:PKGDIR | Format-Table -AutoSize
+
+      - name: Show sdist tree (top)
+        shell: pwsh
+        run: |
+          Write-Host "== sdist top-level =="
+          Get-ChildItem -Path sdist -Force | Format-Table -AutoSize
+
+          Write-Host "== first 80 files under sdist (name only) =="
+          Get-ChildItem -Path sdist -Recurse -File -Force |
+            Select-Object -First 80 FullName
 
       - name: Build wheel (cp314 win_amd64 only)
         env:
           CIBW_BUILD: "cp314-win_amd64"
           CIBW_SKIP: "cp314t-*"
-          CIBW_ENVIRONMENT: "PATH=${{ env.PATH }};C:\\OpenModelica*\\bin"
+          CIBW_ENVIRONMENT: "PATH=$PATH;C:\\Program Files\\OpenModelica*\\bin"
           CIBW_REPAIR_WHEEL_COMMAND: >
             python -m delvewheel repair -w {dest_dir} {wheel}
         run: |
