@@ -26,7 +26,7 @@ jobs:
 
       - name: Download OMSimulator sdist from PyPI
         run: |
-          python -m pip download --no-binary :all: OMSimulator==3.0.0.post116 -d sdist
+          python -m pip download --no-deps --no-binary :all: OMSimulator==3.0.0.post116 -d sdist
 
       - name: Extract sdist
         shell: pwsh
