@@ -15,7 +15,7 @@ jobs:
       - name: Setup Python (bootstrap)
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.14.2"
 
       - name: Install OpenModelica (optional, provides DLLs/tools)
         uses: OpenModelica/setup-openmodelica@v1
